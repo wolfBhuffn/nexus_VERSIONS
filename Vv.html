@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NEXUS // LIFE OPERATIONS - BUILD 07.1 UPDATED</title>
+<style>
+:root{--bg:#090909;--p:#141414;--line:#39342f;--bone:#e8dfc9;--muted:#aaa398;--red:#c51f30;--amber:#d69a42;--green:#8eb79c}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--bone);font:15px/1.6 system-ui,sans-serif}
+main{max-width:1200px;margin:auto;padding:32px 22px}
+.panel{background:linear-gradient(135deg,#1b1b1b,#101010);border:1px solid var(--line);padding:22px;margin-bottom:20px}
+h1{font-size:32px;margin:10px 0}
+h2{font-size:20px;color:var(--amber)}
+.eyebrow{font-size:11px;letter-spacing:1.5px;color:var(--amber);font-family:monospace}
+.mono{font-family:ui-monospace,Consolas,monospace}
+table{width:100%;border-collapse:collapse;font:12px/1.8 monospace}
+th,td{padding:10px;text-align:left;border-bottom:1px solid var(--line)}
+button,.button{background:#171717;border:1px solid var(--line);color:var(--bone);padding:10px 13px;font-size:11px;font-family:monospace;cursor:pointer}
+.primary{background:var(--red);border-color:var(--red)}
+input,select,textarea{width:100%;padding:10px;border:1px solid var(--line);background:#090909;color:var(--bone);font-family:monospace;font-size:12px;margin-top:6px}
+.flash{animation:glitch .4s steps(3)}
+@keyframes glitch{20%{transform:translate(-3px,2px);filter:hue-rotate(70deg)}60%{transform:translate(3px,-2px);filter:hue-rotate(-70deg)}}
+</style>
+</head>
+<body>
+<main>
+<span class="eyebrow">NEXUS // 07.1 RECONCILER & CLI UPDATE</span>
+<h1 class="mono">HOURS & PAYCHECK RECONCILER + CLI HISTORY</h1>
+<p>This email contains the complete updated code and specifications requested for your NEXUS Life Operations system (Build 07.1), featuring the default $20.00 base rate, paycheck notes, glitch animation on logging, and the new CLI `payroll` history command.</p>
+
+<div class="panel">
+<h2>1. Summary of Updates Implemented</h2>
+<ul>
+  <li><strong>Default Base Hourly Rate:</strong> Set to <code>$20.00</code> per hour.</li>
+  <li><strong>Paycheck Notes Field:</strong> Added a note input box when logging paychecks so each entry can be annotated.</li>
+  <li><strong>Glitch Animation Feedback:</strong> Triggers a tactical glitch animation on the income panel whenever a paycheck is successfully logged.</li>
+  <li><strong>CLI Payroll History Command:</strong> Typing <code>payroll</code> or <code>income</code> in the terminal displays the complete logged payroll history with dates, hours, gross, net, and notes.</li>
+</ul>
+</div>
+
+<div class="panel">
+<h2>2. Complete Updated Code snippet (index.html components)</h2>
+<p>Here is the exact code block for your HTML form and JavaScript logic implementing these features:</p>
+<pre class="mono" style="background:#070807;padding:16px;overflow:auto;font-size:11px;color:#bdb5a8;border:1px solid var(--line);">
+&lt;!-- INCOME CALCULATOR FORM --&gt;
+&lt;form id="income-calculator-form" onsubmit="handleLogPaycheck(event)" class="space-y-4"&gt;
+  &lt;div class="grid grid-cols-1 sm:grid-cols-3 gap-3"&gt;
+    &lt;div&gt;
+      &lt;label class="block text-[10px] text-nexus-subtle uppercase mb-1"&gt;Regular Hours Worked&lt;/label&gt;
+      &lt;input type="number" id="income-hours" value="80" step="0.5" oninput="calculateIncome()" required&gt;
+    &lt;/div&gt;
+    &lt;div&gt;
+      &lt;label class="block text-[10px] text-nexus-subtle uppercase mb-1"&gt;Base Hourly Rate ($/hr)&lt;/label&gt;
+      &lt;input type="number" id="income-rate" value="20.00" step="0.5" oninput="calculateIncome()" required&gt;
+    &lt;/div&gt;
+    &lt;div&gt;
+      &lt;label class="block text-[10px] text-nexus-subtle uppercase mb-1"&gt;Overtime Hours&lt;/label&gt;
+      &lt;input type="number" id="income-ot-hours" value="0" step="0.5" oninput="calculateIncome()"&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;div&gt;
+    &lt;label class="block text-[10px] text-nexus-subtle uppercase mb-1"&gt;Paycheck Note / Description&lt;/label&gt;
+    &lt;input type="text" id="income-note" placeholder="e.g. Regular pay + 5hrs OT"&gt;
+  &lt;/div&gt;
+
+  &lt;div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-nexus-border/50"&gt;
+    &lt;div class="bg-black/50 border border-nexus-border p-3 rounded"&gt;
+      &lt;span class="text-[10px] text-nexus-subtle uppercase block"&gt;Calculated Gross Pay&lt;/span&gt;
+      &lt;span id="calc-gross-output" class="text-lg font-bold text-white font-mono"&gt;$1,600.00&lt;/span&gt;
+    &lt;/div&gt;
+    &lt;div class="bg-black/50 border border-nexus-border p-3 rounded"&gt;
+      &lt;span class="text-[10px] text-nexus-subtle uppercase block"&gt;Estimated Net Take-Home&lt;/span&gt;
+      &lt;span id="calc-net-output" class="text-lg font-bold text-nexus-green font-mono"&gt;$1,152.00&lt;/span&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;button type="submit" class="w-full bg-red-600 text-white font-bold py-2.5 rounded text-xs"&gt;
+    LOG PAYCHECK TO SYSTEM HISTORY
+  &lt;/button&gt;
+&lt;/form&gt;
+
+&lt;script&gt;
+function handleLogPaycheck(e) {
+  e.preventDefault();
+  if (state.sessionRole === 'GUEST') {
+    alert('Guest role cannot log income.');
+    return;
+  }
+  const hours = parseFloat(document.getElementById('income-hours').value) || 0;
+  const rate = parseFloat(document.getElementById('income-rate').value) || 20.00;
+  const otHours = parseFloat(document.getElementById('income-ot-hours').value) || 0;
+  const note = document.getElementById('income-note').value.trim() || 'Standard Paycheck';
+
+  const gross = (hours * rate) + (otHours * rate * 1.5);
+  const net = gross * 0.72;
+
+  const newLog = {
+    id: Date.now(),
+    date: new Date().toISOString().split('T')[0],
+    hours: hours + otHours,
+    gross: gross,
+    net: net,
+    note: note
+  };
+
+  state.incomeLogs.unshift(newLog);
+  saveState('nexus_income', state.incomeLogs);
+  renderIncome();
+
+  // Trigger Glitch Animation
+  const incomePanel = document.getElementById('income');
+  if(incomePanel) {
+    incomePanel.classList.add('flash');
+    setTimeout(() => incomePanel.classList.remove('flash'), 400);
+  }
+
+  logTelemetry(`[INCOME LOGGED] Net Pay: $${net.toFixed(2)} | Note: ${note}`);
+}
+
+function renderIncome() {
+  const historyContainer = document.getElementById('income-history-table');
+  if(!historyContainer) return;
+  historyContainer.innerHTML = state.incomeLogs.map(log => `
+    &lt;tr class="font-mono hover:bg-neutral-900"&gt;
+      &lt;td class="py-2.5 text-white"&gt;${log.date}&lt;/td&gt;
+      &lt;td class="py-2.5 text-neutral-400"&gt;${log.hours} hrs&lt;/td&gt;
+      &lt;td class="py-2.5 text-white"&gt;$${log.gross.toFixed(2)}&lt;/td&gt;
+      &lt;td class="py-2.5 text-emerald-400 font-bold"&gt;$${log.net.toFixed(2)}&lt;/td&gt;
+      &lt;td class="py-2.5 text-amber-400 text-[11px]"&gt;${log.note || '-'}&lt;/td&gt;
+      &lt;td class="py-2.5 text-right"&gt;&lt;button onclick="deleteIncomeLog(${log.id})"&gt;[X]&lt;/button&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;`).join('');
+}
+
+// CLI Integration for 'payroll' and 'income'
+// Add inside CLI switch statement:
+case 'income':
+case 'payroll':
+  if (!state.incomeLogs || state.incomeLogs.length === 0) {
+    resp = `NO PAYROLL LOGS FOUND IN VAULT.`;
+  } else {
+    resp = `=== PAYROLL LOG HISTORY (${state.incomeLogs.length} RECORDS) ===\n` +
+      state.incomeLogs.map((l, i) => 
+        `[#${i+1}] ${l.date} | ${l.hours}hrs | Gross: $${l.gross.toFixed(2)} | Net: $${l.net.toFixed(2)} | Note: "${l.note || 'N/A'}"`
+      ).join('\n');
+  }
+  break;
+&lt;/script&gt;
+</pre>
+</div>
+
+<div class="panel">
+<h2>3. Deployment Instructions</h2>
+<ol>
+  <li>Open your local <code>index.html</code> file in your text editor.</li>
+  <li>Replace the income reconciler form and associated JavaScript helper functions with the blocks above.</li>
+  <li>Reload the app in your browser to verify the default <code>$20.00</code> rate, add a test note, observe the glitch animation upon logging, and type <code>payroll</code> in the CLI terminal.</li>
+</ol>
+</div>
+
+<footer>NEXUS LIFE OPERATIONS // BUILD 07.1 SECURE TRANSMISSION</footer>
+</main>
+</body>
+</html>
